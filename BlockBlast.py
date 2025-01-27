@@ -1,6 +1,6 @@
-
 import pygame
 import random
+import sqlite3
 
 pygame.init()
 
@@ -133,7 +133,40 @@ def remove_full_rows_and_columns(placed_blocks, playing_field):
         return 0, placed_blocks
 
 def animate_row_clear():
-    pass
+    class Registration(QDialog):
+        def __init__(self):
+            super().__init__()
+            self.con = sqlite3.connect("IPSirazetdinovarslan_DataBase.sqlite")  # подключаем нашу базу данных
+            self.pushButton_registration_verified.clicked.connect(self.registration_verified)  # подключаем кнопку
+
+        # создаем функцию для прохождения регистрации
+        def registration_verified(self):
+            global Registered_is_True  # глобализируем переменную
+            conn = sqlite3.connect('IPSirazetdinovarslan_DataBase.sqlite')
+            cursor = conn.cursor()
+            login = self.textEdit_login.toPlainText()  # создаем переменные с текстом логина
+            password = self.textEdit_password.toPlainText()  # пароля
+
+            # провяем пустые ли строки
+            if self.textEdit_login.toPlainText() != '' and self.textEdit_login.toPlainText() != '':
+                sql1 = '''SELECT * FROM registered_people WHERE Login = ? AND Password = ?'''  # создаем запрос, чтобы
+                # посмотреть есть ли пользователь по нашему логину и паролю
+                val = (login, password)  # создаем структуру запросы со знаками ?
+                result = cursor.execute(sql1, val).fetchone()  # ищем пользователей в нашей базе данных
+                if result == None:  # если их нет
+                    sql = '''INSERT INTO registered_people (Login, Password) VALUES (?, ?)'''  # создаем запрос на
+                    # добавление нового пользователя
+                    cursor.execute(sql, val)  # выполняем запрос
+                    conn.commit()  # сохраняем
+                    conn.close()  # закрываем
+                    self.close()  # закрываем окно
+                    Registered_is_True = True  # меняем переменную
+                else:  # иначе логин занят
+                    self.textEdit_login.setPlainText('Логин уже занят')
+                    self.textEdit_password.setPlainText('')
+            else:
+                self.textEdit_login.setPlainText('Введите логин')
+                self.textEdit_password.setPlainText('Введите пароль')
 
 def run_registration():
     username = ""
