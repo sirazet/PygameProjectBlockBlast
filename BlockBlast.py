@@ -136,6 +136,10 @@ def animate_row_clear():
     class Registration(QDialog):
         def __init__(self):
             super().__init__()
+            f = io.StringIO(template_Registration)  # подключаем QtDesigner
+            uic.loadUi(f, self)
+            self.setModal(True)
+            self.setWindowTitle('Регистрация')
             self.con = sqlite3.connect("IPSirazetdinovarslan_DataBase.sqlite")  # подключаем нашу базу данных
             self.pushButton_registration_verified.clicked.connect(self.registration_verified)  # подключаем кнопку
 
